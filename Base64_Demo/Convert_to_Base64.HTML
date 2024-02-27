@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head lang="en-au">
+    <meta charset="utf-8" />
+    <title>Sample jQuery Load to DIV</title>
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.3.1.min.js"></script>
+    <script>
+        function loadJSONTo(targetElement) {
+            if (window.File && window.FileReader && window.FileList && window.Blob) {
+                // Great success! All the File APIs are supported.
+            } else {
+                alert('The File APIs are not fully supported in this browser.');
+                return;
+            }
+            $(targetElement).html("");
+            $.getJSON("collection-of-pdfs.json", function (data) {
+                for (item in data) {
+
+                    $.ajax({
+                        async: true,
+                        url: data[item].pdfname,
+                        data: "item=" + item,
+                        success: function (data2, success, response) {
+                                  if (response.readyState == 4) {
+                                  var fileName =   this.url.split("=")[0];
+                                  var item2 = this.url.split("=")[1];
+                            // note: W29iamVjdCBCbG9iXQ== translates to "[object Blob]"
+                            var builder = new Blob([data2], {type: "application/pdf"});
+                             var reader = new FileReader();
+                             reader.readAsDataURL(builder); 
+                             reader.onloadend = function() {
+                             var fileName2 = fileName;
+                             var item3 = item2;
+                               if (reader.readyState == 2){        /*Done loading*/
+                                   base64data = reader.result;                
+                                   console.log(base64data);
+                                   $("#span" + item3)[0].innerText = fileName2 + " " + base64data;
+                               }
+
+                             }
+                          }
+                        }
+                    });
+                
+                }
+            });
+        }
+        
+    </script>
+</head>
+<body>
+    <div id="div1">
+        <button id="theButton" onclick="loadJSONTo('#span1');">Click Me!</button>
+        <input id="inputFile" type="file" style="display:none" />
+    </div>
+    <div><span id="span0"></span></div>
+    <div><span id="span1"></span></div>
+</body>
+</html>
+
